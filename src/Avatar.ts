@@ -22,8 +22,6 @@ export default class Avatar {
   _scale:number = 0.7
 
   async init() {
-    const { loader } = this
-
     const bodyShape:THREE.Object3D = await this.load(BASE_BODY_PATH)     
     this.object.add(bodyShape)
     this.object.scale.set(this._scale, this._scale, this._scale) 
@@ -37,9 +35,13 @@ export default class Avatar {
       })  
     )
 
-    this.walking()
+    mixer.addEventListener('finished', () => {
+      this.idle()
+    })
 
     this.mixer = mixer
+
+    this.idle()
   }
 
   load(srcPath:string) {
@@ -60,12 +62,35 @@ export default class Avatar {
     this._animPlayByName('walking1')
   }
 
-  _animPlayByName(name:string) {
-    const idleAction = this.getActionByName(name)
-    console.log(idleAction)
-    if (idleAction) {
-      idleAction.time = 0
-      idleAction.play() 
+  hello() {
+    this._animPlayByName('hello1', false)
+  }
+
+  dancing() {
+    this._animPlayByName('dancing1', false)
+  }
+
+  gesture() {
+    this._animPlayByName('gesture1', false)
+  }  
+
+  bow() {
+    this._animPlayByName('bow1', false)
+  }
+
+
+  _animPlayByName(name:string, isLoop=true) {
+    const action = this.getActionByName(name)
+
+    if (action) {
+      this.mixer.stopAllAction()
+
+      if (!isLoop) {
+        action.setLoop(THREE.LoopOnce)        
+      }
+      action.clampWhenFinished = isLoop
+      action.time = 0
+      action.play()
     }
   }
 
@@ -75,5 +100,11 @@ export default class Avatar {
     // this.object.rotateY(dt * 0.1)
   }
 
-
+  move(y:number, mx:number, mz:number) {
+    this.object.rotateY(y)
+    this.object.translateX(mx)
+    this.object.translateZ(mz)    
+    // console.log(this.object.rotation)
+    // this.object.rotation.set(y, 1, 1)
+  }
 }

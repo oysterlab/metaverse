@@ -12,5 +12,76 @@ import Avatar from './Avatar'
   world.addAvatar(avatar)
   world.start()
 
+  addEventListener("keydown", (ev: KeyboardEvent) => {
+    if (ev.key == '1') {
+      avatar.hello()
+    } else if(ev.key == '2') {
+      avatar.bow()
+    } else if(ev.key == '3') {
+      avatar.gesture()      
+    } else if(ev.key == '4') {
+      avatar.dancing()            
+    }
+    // const LEFT_RAD = -0.5 * Math.PI
+    // const DOWN_RAD = 0 * Math.PI
+    // const UP_RAD = 1 * Math.PI   
+    // const RIGHT_RAD = 0.5 * Math.PI
+
+    // if (ev.key == 'ArrowUp') {
+    //   avatar.move(UP_RAD)      
+    // } else if (ev.key == 'ArrowRight') {
+    //   avatar.move(RIGHT_RAD)      
+    // } else if (ev.key == 'ArrowDown') {
+    //   avatar.move(DOWN_RAD)      
+    // } else if (ev.key == 'ArrowLeft') {
+    //   avatar.move(LEFT_RAD)
+    // }
+  })
+
+  let prevMousePose:any = null
+  let moveId:any = false
+  addEventListener('mousedown', (ev:MouseEvent) => {
+    prevMousePose = {
+      x: ev.clientX,
+      y: ev.clientY,      
+    }
+    avatar.walking()
+
+    moveId = setInterval(() => {
+      const deg = Math.atan2(avatar.object.rotation.y, avatar.object.rotation.x)
+      const mx = -Math.cos(deg)
+      const mz = -Math.sin(deg)
+
+      avatar.move(0, mx, mz)
+    }, 10)
+  })
+
+  addEventListener('mousemove', (ev:MouseEvent) => {
+    if (prevMousePose) {
+      const dx = ev.clientX - prevMousePose.x
+      // const dy = ev.clientY - moveInit.y    
+
+      let d = dx / 100
+
+      avatar.move(d, 0, 0)
+      prevMousePose = {
+        x: ev.clientX,
+        y: ev.clientY,      
+      }
+    }    
+  })
+
+
+
+  addEventListener('mouseup', (ev:MouseEvent) => {
+    prevMousePose = null
+    avatar.idle()
+
+    if (moveId != false) {
+      clearInterval(moveId)
+    }
+    moveId = false
+  })  
+
   document.body.appendChild(world.domElement)
 })()

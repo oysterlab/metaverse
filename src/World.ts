@@ -15,7 +15,7 @@ export default class World {
 
   constructor(width:number, height:number) {
     const camera = new THREE.PerspectiveCamera(45, width/height, 1, 5000)
-    camera.position.set(45, 689, 986)
+    camera.position.set(45, 89, 986)
     
     const scene = new THREE.Scene()
     scene.background = new THREE.Color(0x000000)
@@ -27,8 +27,8 @@ export default class World {
     renderer.setPixelRatio(window.devicePixelRatio)
     renderer.setSize(width, height)    
 
-    const orbitControls = new OrbitControls(camera, renderer.domElement)
-    orbitControls.update()
+    // const orbitControls = new OrbitControls(camera, renderer.domElement)
+    // orbitControls.update()
 
     this._renderer = renderer
     this._camera = camera
@@ -36,7 +36,7 @@ export default class World {
     this._light = light
     this._width = width
     this._height = height
-    this._orbitControls = orbitControls
+    // this._orbitControls = orbitControls
   }
 
   get dt() {
@@ -50,7 +50,7 @@ export default class World {
   _animate() {
     requestAnimationFrame(() => this._animate())
     
-    this._orbitControls.update()
+    // this._orbitControls.update()
     this._avatars.forEach((avatar:Avatar) => avatar.animate(this.dt))
     this._renderer.render(this._scene, this._camera)
   }
