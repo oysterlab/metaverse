@@ -1,0 +1,28 @@
+{
+  "name": "metavers",
+  "version": "1.0.0",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "webpack serve --inline --open"
+  },
+  "keywords": [],
+  "author": "oysterlab",
+  "license": "MIT",
+  "devDependencies": {
+    "css-loader": "latest",
+    "html-webpack-plugin": "latest",
+    "progress-bar-webpack-plugin": "latest",
+    "style-loader": "latest",
+    "ts-loader": "latest",
+    "typescript": "latest",
+    "webpack": "latest",
+    "webpack-cli": "latest",
+    "webpack-dev-server": "latest"
+  },
+  "dependencies": {
+    "path": "^0.12.7",
+    "three": "latest",
+    "three-fbx-loader": "^1.0.3"
+  }
+}
