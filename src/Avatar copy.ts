@@ -1,8 +1,9 @@
+
 import * as THREE from 'three'
 import { FBXLoader } from 'three/examples/jsm/loaders/FBXLoader'
 const path = require('path')
 
-THREE.Cache.enabled = true
+
 const ASSETS_PATH = '/assets'
 
 const ANIMATION_PATHS = [
@@ -14,63 +15,71 @@ const ANIMATION_PATHS = [
 const BASE_BODY_PATH = path.join(ASSETS_PATH, 'base.fbx')
 const BODY_TEXTURE_PATH = path.join(ASSETS_PATH, 'bodyTexture3.png')
 
-const fbxLoader:FBXLoader = new FBXLoader()
-const textureLoader:THREE.TextureLoader = new THREE.TextureLoader()
-
 export default class Avatar {
+  fbxLoader:FBXLoader = new FBXLoader()
+  textureLoader:THREE.TextureLoader = new THREE.TextureLoader()
+  
   mixer:THREE.AnimationMixer|null = null
   actions:THREE.AnimationAction[] = []
   object:THREE.Object3D = new THREE.Object3D()
   _scale:number = 0.7 + 0.3 * Math.random()
 
-  async init() {
+  initPosition:THREE.Vector3;
 
-    const bodyShape:THREE.Object3D = await this.fbxLoad(BASE_BODY_PATH)     
-    const bodyTexture:THREE.Object3D = await this.textureLoad(BODY_TEXTURE_PATH)         
-    bodyTexture.wrapS = THREE.ClampToEdgeWrapping;
-    bodyTexture.wrapT = THREE.ClampToEdgeWrapping;    
-    const bodyMaterial = new THREE.MeshLambertMaterial({map: bodyTexture, needsUpdate: true})
-    bodyShape.children[0].material = bodyMaterial
+  constructor(bodyShape_, bodyMaterial_, animations_) {
+    
+    const x = 0;//(Math.random() - 0.5) * 3000
+    const z = 0;//  (Math.random() - 0.5) * 800      
+    this.initPosition = new THREE.Vector3(x, 0, z);
+
+    const bodyShape:THREE.Object3D = bodyShape_.clone()
+    // const bodyMaterial:THREE.THREE.MeshLambertMaterial = bodyMaterial_.clone()    
+    bodyShape.children[0].material = bodyMaterial_
 
     this.object.add(bodyShape)
-    
     this.object.scale.set(this._scale, this._scale, this._scale) 
-    this.object.position.x = (Math.random() - 0.5) * 2 * 800
-    this.object.position.z = 1300 + Math.random() * 300
-    this.object.rotation.y = (Math.PI) + (Math.random() - 0.5) * (Math.PI) * 0.6
-  
+    this.object.position.x = this.initPosition.x
+    this.object.position.z = this.initPosition.z
+    this.object.rotation.y = Math.PI * (Math.random() - 0.5)
+
     const mixer = new THREE.AnimationMixer(this.object)
-    this.actions = await  Promise.all(
+    // this.actions = animations_.map((animation) =>{
+    //   const action = mixer.clipAction(animation)
+    //   action.name = animation.name
+    //   return action
+    // })
+
+
+    
+    this.mixer = mixer
+
+    mixer.addEventListener('finished', () => {
+      this.idle()
+    })
+
+
+
+  }
+
+  async init() {
+    this.actions = await Promise.all(
       ANIMATION_PATHS.map(async (animPath: string) => {
         const obj:THREE.Object3D = await this.fbxLoad(animPath)
-        const action = mixer.clipAction(obj.animations[0])
+        const action = this.mixer.clipAction(obj.animations[0])
         action.name = path.basename(animPath, '.fbx')
         return action
       })  
     )
 
-
-    this.mixer = mixer
-    this.idle()
-
-    mixer.addEventListener('finished', () => {
-      this.randomMotionPlay()
-    })
-
+    this.idle()    
   }
 
-  randomMotionPlay() {
-    const motionFuncs = [() => this.hello(), () => this.dancing(), () => this.gesture(), () => this.bow()]
-    const idx = parseInt((Math.random() * motionFuncs.length) + '')
-    motionFuncs[idx]()
-  } 
-
-  fbxLoad(srcPath:string) {
-    return new Promise((resolve) => fbxLoader.load(srcPath, (obj:any) => resolve(obj)))
+  async textureLoad(srcPath:string) {
+    return await new Promise((resolve) => this.textureLoader.load(srcPath, (obj:any) => resolve(obj)))
   }
 
-  textureLoad(srcPath:string) {
-    return new Promise((resolve) => textureLoader.load(srcPath, (obj:any) => resolve(obj)))
+  async fbxLoad(srcPath:string) {
+    return await new Promise((resolve) => this.fbxLoader.load(srcPath, (obj:any) => resolve(obj)))
   }
 
   getActionByName(name:string):THREE.AnimationAction|null {
@@ -80,7 +89,7 @@ export default class Avatar {
   }
 
   idle() {
-    this._animPlayByName('idle1', false)
+    this._animPlayByName('idle1')
   }
 
   walking() {
@@ -103,6 +112,7 @@ export default class Avatar {
     this._animPlayByName('bow1', false)
   }
 
+
   _animPlayByName(name:string, isLoop=true) {
     const action = this.getActionByName(name)
     if (action) {
@@ -123,5 +133,11 @@ export default class Avatar {
     // this.object.rotateY(dt * 0.1)
   }
 
-
+  move(y:number, mx:number, mz:number) {
+    this.object.rotateY(y)
+    this.object.translateX(mx)
+    this.object.translateZ(mz)    
+    // console.log(this.object.rotation)
+    // this.object.rotation.set(y, 1, 1)
+  }
 }

@@ -4,7 +4,7 @@
   "main": "index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "start": "webpack serve --inline --open"
+    "start": "webpack serve --inline --open --host 0.0.0.0"
   },
   "keywords": [],
   "author": "oysterlab",
